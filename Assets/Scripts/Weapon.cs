@@ -2,6 +2,7 @@ using Photon.Pun;
 using UnityEngine;
 using TMPro;
 using System.Collections;
+using Unity.VisualScripting;
 
 public class Weapon : MonoBehaviour
 {
@@ -31,11 +32,14 @@ public class Weapon : MonoBehaviour
     public TextMeshProUGUI ammoText;
 
 
-    private enum movementState { idle, run, fullReload, reload }
+    private enum movementState { idle, run, fullReload, reload_1, reload_2, walk }
 
     private movementState state;
 
-    private bool isReloading, isFull, isRunning;
+    private bool isReloading, isFull, isOne, isRunning;
+
+
+    public static bool isWalking, isGrounded;
 
 
     private void Start()
@@ -57,6 +61,8 @@ public class Weapon : MonoBehaviour
 
         if (Input.GetButton("Fire1") && nextFire <= 0 && ammo > 0 && isReloading == false)
         {
+            isRunning = false;
+
             nextFire = 1 / fireRater;
 
             ammo--;
@@ -67,11 +73,35 @@ public class Weapon : MonoBehaviour
             Fire();
         }
 
+
         if (Input.GetKeyDown(KeyCode.R) && ammo != 30)
         {
             Reload();
         }
+
+
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            isRunning = true;
+        }
+        else if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            isRunning = false;
+        }
     }
+
+
+    private void RandomNum()
+    {
+        int randomRange = Random.Range(1, 3);
+
+        if (randomRange == 1)
+        {
+            isOne = true;
+        }
+        else { isOne = false; }
+    }
+
 
     private void Reload()
     {
@@ -81,7 +111,12 @@ public class Weapon : MonoBehaviour
             {
                 isFull = true;
             }
-            else { isFull = false; }
+            else
+            {
+                isFull = false;
+                
+                RandomNum();
+            }
 
             StartCoroutine(Reloading());
 
@@ -125,7 +160,7 @@ public class Weapon : MonoBehaviour
         }
         else
         {
-            yield return new WaitForSeconds(2.8f);
+            yield return new WaitForSeconds(2.7f);
         }
 
         isReloading = false;
@@ -141,7 +176,19 @@ public class Weapon : MonoBehaviour
         }
         else if (isReloading && !isFull)
         {
-            state = movementState.reload;
+            if (isOne)
+            {
+                state = movementState.reload_1;
+            }
+            else { state = movementState.reload_2; }
+        }
+        else if (isRunning && isGrounded)
+        {
+            state = movementState.run;
+        }
+        else if (isWalking && !isRunning)
+        {
+            state = movementState.walk;
         }
         else
         {

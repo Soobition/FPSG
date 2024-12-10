@@ -2,15 +2,17 @@ using UnityEngine;
 
 public class Movement : MonoBehaviour
 {
-    [SerializeField] private float walkSpeed = 8f;
-    [SerializeField] private float sprintSpeed = 14f;
-    [SerializeField] private float maxVelocityChange = 10f;
+    public float walkSpeed = 6f;
+    public float sprintSpeed = 10f;
+    public float maxVelocityChange = 10f;
 
     [Space]
-    [SerializeField] private float airControl = .5f;
+    public float airControl = .5f;
 
     [Space]
-    [SerializeField] private float jumpHeight = 5f;
+    public float jumpHeight = 5f;
+
+    private float speedThreshold = .1f;     // Sensitivity threshold for detecting movement
 
 
     private Vector2 input;
@@ -21,6 +23,7 @@ public class Movement : MonoBehaviour
 
     private bool sprinting;
     private bool jumping;
+
 
     private bool grounded = false;
 
@@ -38,8 +41,22 @@ public class Movement : MonoBehaviour
         input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical") * 3);
         input.Normalize();
 
+
+        // Check if the character's speed is greater than the threshold
+        if (rb.linearVelocity.magnitude > speedThreshold)
+            Weapon.isWalking = true;
+        else { Weapon.isWalking = false; }
+
+
         sprinting = Input.GetButton("Fire3");
         jumping = Input.GetButton("Jump");
+
+
+        if (grounded)
+        {
+            Weapon.isGrounded = true;
+        }
+        else { Weapon.isGrounded = false; }
     }
 
 
@@ -60,7 +77,11 @@ public class Movement : MonoBehaviour
             }
             else if (input.magnitude > .5f)
             {
-                rb.AddForce(CalculateMovement(sprinting ? sprintSpeed : walkSpeed), ForceMode.VelocityChange);
+                if (!Input.GetButton("Fire1"))
+                {
+                    rb.AddForce(CalculateMovement(sprinting ? sprintSpeed : walkSpeed), ForceMode.VelocityChange);
+                }
+                else { rb.AddForce(CalculateMovement(sprinting ? sprintSpeed - 2.5f : walkSpeed), ForceMode.VelocityChange); }
             }
             else
             {
