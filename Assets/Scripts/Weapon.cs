@@ -7,8 +7,6 @@ using Unity.VisualScripting;
 public class Weapon : MonoBehaviour
 {
 
-    private Animator anim;
-
     public Camera camera;
 
     public int damage;
@@ -31,15 +29,49 @@ public class Weapon : MonoBehaviour
     public TextMeshProUGUI magText;
     public TextMeshProUGUI ammoText;
 
+    [Header("Recoil Settings")]
+    /*[Range(0, 1)]
+    public float recoilPercent = 0.3f;*/
 
+    [Range(0, 2)]
+    public float recoverPercent = .7f;
+
+    [Space]
+    public float recoilUp = 1f;
+    public float recoilBack = 0f;
+
+    [Header("Holster Settings")]
+    public float holsterUp = -3f;
+
+
+
+    public static bool isWalking, isGrounded, isHolsterUp, isHolsterDown;
+
+
+
+    private Animator anim;
+
+
+    private Vector3 originalPosition;
+
+    private Vector3 recoilVelocity = Vector3.zero;
+
+
+    private Quaternion originalRotation;
+
+
+    private float recoilLength;
+
+    private float recoverLength;
+
+    
     private enum movementState { idle, run, fullReload, reload_1, reload_2, walk }
 
     private movementState state;
 
-    private bool isReloading, isFull, isOne, isRunning;
 
+    private bool isReloading, isFull, isOne, isRunning, recoiling, recovering;
 
-    public static bool isWalking, isGrounded;
 
 
     private void Start()
@@ -47,7 +79,18 @@ public class Weapon : MonoBehaviour
         magText.text = mag.ToString();
         ammoText.text = ammo + "/" + magAmmo;
 
+
         anim = GetComponent<Animator>();
+
+
+        originalPosition = transform.localPosition;
+
+        originalRotation = transform.localRotation;
+
+
+        recoilLength = 0;
+
+        recoverLength = 1 / fireRater * recoverPercent;
     }
 
 
@@ -87,6 +130,61 @@ public class Weapon : MonoBehaviour
         else if (Input.GetKeyUp(KeyCode.LeftShift))
         {
             isRunning = false;
+        }
+
+
+        if (recoiling)
+        {
+            Recoil();
+        }
+
+
+        if (recovering)
+        {
+            Recovering();
+        }
+    }
+
+
+    private void FixedUpdate()
+    {
+        if (isHolsterUp)
+        {
+            HolsterUp();
+        }
+        else if (isHolsterDown)
+        {
+            HolsterDown();
+        }
+    }
+
+
+    private void HolsterUp()
+    {
+        Quaternion finalRotation = new Quaternion(originalRotation.x + holsterUp, originalRotation.y, originalRotation.z, originalRotation.w);
+
+        transform.localRotation = Quaternion.Lerp(transform.localRotation, finalRotation, Time.deltaTime * 10f);
+
+        if (transform.localRotation == finalRotation)
+        {
+            isHolsterUp = false;
+
+            isHolsterDown = true;
+        }
+    }
+
+
+    private void HolsterDown()
+    {
+        Quaternion finalRotation = originalRotation;
+
+        transform.localRotation = Quaternion.Lerp(transform.localRotation, finalRotation, Time.deltaTime * 10f);
+
+        if (transform.localRotation == finalRotation)
+        {
+            isHolsterUp = false;
+
+            isHolsterDown = false;
         }
     }
 
@@ -133,6 +231,11 @@ public class Weapon : MonoBehaviour
 
     private void Fire()
     {
+        recoiling = true;
+
+        recovering = false;
+
+
         Ray ray = new Ray(camera.transform.position, camera.transform.forward);
 
         RaycastHit hit;
@@ -148,6 +251,41 @@ public class Weapon : MonoBehaviour
         }
     }
 
+
+
+    private void Recoil()
+    {
+        Vector3 finalPosition = new Vector3(originalPosition.x, originalPosition.y + recoilUp, originalPosition.z - recoilBack);
+
+
+        transform.localPosition = Vector3.SmoothDamp(transform.localPosition, finalPosition, ref recoilVelocity, recoilLength);
+
+
+        if (transform.localPosition == finalPosition)
+        {
+            recoiling = false;
+
+            recovering = true;
+        }
+    }
+
+
+    private void Recovering()
+    {
+        Vector3 finalPosition = originalPosition;
+
+
+        transform.localPosition = Vector3.SmoothDamp(transform.localPosition, finalPosition, ref recoilVelocity, recoverLength);
+
+
+        if (transform.localPosition == finalPosition)
+        {
+            recoiling = false;
+
+            recovering = false;
+        }
+    }
+
     
     
     IEnumerator Reloading()
@@ -156,11 +294,19 @@ public class Weapon : MonoBehaviour
 
         if (isFull)
         {
-            yield return new WaitForSeconds(3.5f);
+            if (gameObject.name == ("FpsAnims"))
+            {
+                yield return new WaitForSeconds(3.5f);
+            }
+            else { yield return new WaitForSeconds(2.8f); }
         }
         else
         {
-            yield return new WaitForSeconds(2.7f);
+            if (gameObject.name == ("FpsAnims"))
+            {
+                yield return new WaitForSeconds(2.7f);
+            }
+            else { yield return new WaitForSeconds(2f); }
         }
 
         isReloading = false;
@@ -176,13 +322,17 @@ public class Weapon : MonoBehaviour
         }
         else if (isReloading && !isFull)
         {
-            if (isOne)
+            if (gameObject.name == ("FpsAnims"))
             {
-                state = movementState.reload_1;
+                if (isOne)
+                {
+                    state = movementState.reload_1;
+                }
+                else { state = movementState.reload_2; }
             }
-            else { state = movementState.reload_2; }
+            else { state = movementState.reload_1; }
         }
-        else if (isRunning && isGrounded)
+        else if (isRunning && isGrounded && isWalking)
         {
             state = movementState.run;
         }
