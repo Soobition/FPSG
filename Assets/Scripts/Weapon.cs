@@ -1,11 +1,15 @@
 using Photon.Pun;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 using Unity.VisualScripting;
+using Photon.Pun.UtilityScripts;
 
 public class Weapon : MonoBehaviour
 {
+
+    public Image ammoCircle; 
 
     public Camera camera;
 
@@ -74,10 +78,18 @@ public class Weapon : MonoBehaviour
 
 
 
+    private void SetAmmo()
+    {
+        ammoCircle.fillAmount = (float)ammo / magAmmo;
+    }
+
+
+
     private void Start()
     {
         magText.text = mag.ToString();
         ammoText.text = ammo + "/" + magAmmo;
+        SetAmmo();
 
 
         anim = GetComponent<Animator>();
@@ -112,6 +124,7 @@ public class Weapon : MonoBehaviour
 
             magText.text = mag.ToString();
             ammoText.text = ammo + "/" + magAmmo;
+            SetAmmo();
 
             Fire();
         }
@@ -225,6 +238,7 @@ public class Weapon : MonoBehaviour
 
         magText.text = mag.ToString();
         ammoText.text = ammo + "/" + magAmmo;
+        SetAmmo();
     }
 
 
@@ -240,12 +254,28 @@ public class Weapon : MonoBehaviour
 
         RaycastHit hit;
 
+        PhotonNetwork.LocalPlayer.AddScore(1);
+
+
         if (Physics.Raycast(ray.origin, ray.direction, out hit, 100f))
         {
             PhotonNetwork.Instantiate(hitVFX.name, hit.point, Quaternion.identity);
 
             if (hit.transform.gameObject.GetComponent<Health>())
             {
+                PhotonNetwork.LocalPlayer.AddScore(damage);
+
+                if (damage >= hit.transform.gameObject.GetComponent<Health>().health)
+                {
+                    //Kill
+
+                    RoomManager.instance.kills++;
+                    RoomManager.instance.SetHashes();
+
+                    PhotonNetwork.LocalPlayer.AddScore(100);
+                }
+
+
                 hit.transform.gameObject.GetComponent<PhotonView>().RPC("TakeDamage", RpcTarget.All, damage);
             }
         }

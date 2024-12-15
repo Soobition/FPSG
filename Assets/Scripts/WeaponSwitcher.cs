@@ -22,10 +22,32 @@ public class WeaponSwitcher : MonoBehaviour
             selectedWeapon = 0;
         }
 
+
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             selectedWeapon = 1;
         }
+
+
+        if (Input.GetAxis("Mouse ScrollWheel") > 0)
+        {
+            if (selectedWeapon >= transform.childCount - 1)
+            {
+                selectedWeapon = 0;
+            }
+            else { selectedWeapon += 1; }
+        }
+
+
+        if (Input.GetAxis("Mouse ScrollWheel") < 0)
+        {
+            if (selectedWeapon <= 0)
+            {
+                selectedWeapon = transform.childCount - 1;
+            }
+            else { selectedWeapon -= 1; }
+        }
+
 
 
         if (previousSelectedWeapon != selectedWeapon)

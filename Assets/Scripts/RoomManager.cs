@@ -1,5 +1,6 @@
 using UnityEngine;
 using Photon.Pun;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 
 public class RoomManager : MonoBehaviourPunCallbacks
@@ -20,8 +21,15 @@ public class RoomManager : MonoBehaviourPunCallbacks
     public GameObject connectingUI;
 
 
+    [HideInInspector]
+    public int kills = 0;
+    [HideInInspector]
+    public int deaths = 0;
+
+
 
     private string nickname = "Unnamed";
+
 
 
 
@@ -31,10 +39,12 @@ public class RoomManager : MonoBehaviourPunCallbacks
     }
 
 
+
     public void ChangeNickname(string _name)
     {
         nickname = _name;
     }
+
 
 
     public void JoinRoomButtonPressed()
@@ -51,12 +61,6 @@ public class RoomManager : MonoBehaviourPunCallbacks
 
 
 
-    void Start()
-    {
-
-    }
-
-
     public override void OnConnectedToMaster()
     {
         base.OnConnectedToMaster();
@@ -67,6 +71,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
     }
 
 
+
     public override void OnJoinedLobby()
     {
         base.OnJoinedLobby();
@@ -75,6 +80,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
 
         PhotonNetwork.JoinOrCreateRoom("Test", null, null);
     }
+
 
 
     public override void OnJoinedRoom()
@@ -89,6 +95,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
     }
 
 
+
     public void SpawnPlayer()
     {
         Transform spawnPoint = spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Length)];
@@ -99,6 +106,27 @@ public class RoomManager : MonoBehaviourPunCallbacks
         _player.GetComponent<Health>().isLocalPlayer = true;
 
         _player.GetComponent<PhotonView>().RPC("SetNickname", RpcTarget.AllBuffered, nickname);
+        PhotonNetwork.LocalPlayer.NickName = nickname;
+    }
+
+
+
+    public void SetHashes()
+    {
+        try
+        {
+            Hashtable hash = PhotonNetwork.LocalPlayer.CustomProperties;
+
+            hash["kills"] = kills;
+            hash["deaths"] = deaths;
+
+            PhotonNetwork.LocalPlayer.SetCustomProperties(hash);
+        }
+
+        catch
+        {
+            // Do Nothing
+        }
     }
 
 }
