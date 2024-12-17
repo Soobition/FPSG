@@ -27,6 +27,9 @@ public class RoomManager : MonoBehaviourPunCallbacks
     public int deaths = 0;
 
 
+    public string roomNameToJoin = "test";
+
+
 
     private string nickname = "Unnamed";
 
@@ -51,34 +54,12 @@ public class RoomManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("Connecting...");
 
-        PhotonNetwork.ConnectUsingSettings();
+        PhotonNetwork.JoinOrCreateRoom(roomNameToJoin, null, null);
 
 
         nameUI.SetActive(false);
 
         connectingUI.SetActive(true);
-    }
-
-
-
-    public override void OnConnectedToMaster()
-    {
-        base.OnConnectedToMaster();
-
-        Debug.Log("Connected to Server!");
-
-        PhotonNetwork.JoinLobby(); 
-    }
-
-
-
-    public override void OnJoinedLobby()
-    {
-        base.OnJoinedLobby();
-
-        Debug.Log("We're in the lobby!");
-
-        PhotonNetwork.JoinOrCreateRoom("Test", null, null);
     }
 
 

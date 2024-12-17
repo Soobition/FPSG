@@ -1,7 +1,11 @@
+using Photon.Pun;
 using UnityEngine;
 
 public class WeaponSwitcher : MonoBehaviour
 {
+
+    public PhotonView playerSetupView;
+
 
     private int selectedWeapon = 0;
 
@@ -65,6 +69,9 @@ public class WeaponSwitcher : MonoBehaviour
 
     private void SelectWeapon()
     {
+        playerSetupView.RPC("SetTPWeapon", RpcTarget.All, selectedWeapon);
+
+
         int i = 0;
 
         foreach (Transform _weapon in transform)
