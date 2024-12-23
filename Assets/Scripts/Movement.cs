@@ -12,7 +12,11 @@ public class Movement : MonoBehaviour
     [Space]
     public float jumpHeight = 5f;
 
-    private float speedThreshold = .1f;     // Sensitivity threshold for detecting movement
+    [Header("Animation")]
+    public Animation handAnimation;
+    public AnimationClip handWalkAnimation;
+    public AnimationClip handIdleAnimation;
+
 
 
     private Vector2 input;
@@ -40,12 +44,6 @@ public class Movement : MonoBehaviour
     {
         input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical") * 3);
         input.Normalize();
-
-
-        // Check if the character's speed is greater than the threshold
-        if (rb.linearVelocity.magnitude > speedThreshold)
-            Weapon.isWalking = true;
-        else { Weapon.isWalking = false; }
 
 
         sprinting = Input.GetButton("Fire3");
@@ -77,14 +75,24 @@ public class Movement : MonoBehaviour
             }
             else if (input.magnitude > .5f)
             {
+                Weapon.isWalking = true;
+
+                handAnimation.clip = handWalkAnimation;
+                handAnimation.Play();
+
                 if (!Input.GetButton("Fire1"))
                 {
                     rb.AddForce(CalculateMovement(sprinting ? sprintSpeed : walkSpeed), ForceMode.VelocityChange);
                 }
-                else { rb.AddForce(CalculateMovement(sprinting ? sprintSpeed - 2.5f : walkSpeed), ForceMode.VelocityChange); }
+                else { rb.AddForce(CalculateMovement(sprinting ? sprintSpeed - 3.5f : walkSpeed), ForceMode.VelocityChange); }
             }
             else
             {
+                Weapon.isWalking = false;
+
+                handAnimation.clip = handIdleAnimation;
+                handAnimation.Play();
+
                 var velocity1 = rb.linearVelocity;
                 velocity1 = new Vector3(velocity1.x * .2f * Time.fixedDeltaTime, velocity1.y, velocity1.z * .2f * Time.fixedDeltaTime);
                 rb.linearVelocity = velocity1;

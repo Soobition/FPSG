@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections;
-using Unity.VisualScripting;
 using Photon.Pun.UtilityScripts;
 
 public class Weapon : MonoBehaviour
@@ -11,9 +10,12 @@ public class Weapon : MonoBehaviour
 
     public Image ammoCircle; 
 
+
     public Camera camera;
 
+
     public int damage;
+
 
     public float fireRater;
 
@@ -21,17 +23,22 @@ public class Weapon : MonoBehaviour
     [Header("VFX")]
     public GameObject hitVFX;
 
-    private float nextFire;
-
 
     [Header("Ammo")]
     public int mag = 5;
     public int ammo = 30;
     public int magAmmo = 30;
 
+
+    [Header("SFX")]
+    public int shootSFXIndex = 0;
+    public PlayerPhotonSoundManager playerPhotonSoundManager;
+
+
     [Header("UI")]
     public TextMeshProUGUI magText;
     public TextMeshProUGUI ammoText;
+
 
     [Header("Recoil Settings")]
     /*[Range(0, 1)]
@@ -49,15 +56,17 @@ public class Weapon : MonoBehaviour
 
 
 
-    public static bool isWalking, isGrounded, isHolsterUp, isHolsterDown;
+    public static bool isWalking, isGrounded, isHolsterUp, isHolsterDown, isRunning;
 
 
 
     private Animator anim;
 
 
-    private Vector3 originalPosition;
+    private float nextFire;
 
+
+    private Vector3 originalPosition;
     private Vector3 recoilVelocity = Vector3.zero;
 
 
@@ -65,16 +74,14 @@ public class Weapon : MonoBehaviour
 
 
     private float recoilLength;
-
     private float recoverLength;
 
     
-    private enum movementState { idle, run, fullReload, reload_1, reload_2, walk }
-
+    private enum movementState { idle, run, fullReload, reload_1, reload_2 }
     private movementState state;
 
 
-    private bool isReloading, isFull, isOne, isRunning, recoiling, recovering;
+    private bool isReloading, isFull, isOne, recoiling, recovering;
 
 
 
@@ -109,6 +116,7 @@ public class Weapon : MonoBehaviour
     void Update()
     {
         UpdateAnimationState();
+
 
         if (nextFire > 0)
             nextFire -= Time.deltaTime;
@@ -250,6 +258,9 @@ public class Weapon : MonoBehaviour
         recovering = false;
 
 
+        playerPhotonSoundManager.PlayShootSFX(shootSFXIndex);
+
+
         Ray ray = new Ray(camera.transform.position, camera.transform.forward);
 
         RaycastHit hit;
@@ -365,10 +376,6 @@ public class Weapon : MonoBehaviour
         else if (isRunning && isGrounded && isWalking)
         {
             state = movementState.run;
-        }
-        else if (isWalking && !isRunning)
-        {
-            state = movementState.walk;
         }
         else
         {
