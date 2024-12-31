@@ -15,9 +15,17 @@ public class Weapon : MonoBehaviour
 
 
     public int damage;
+    public int pelletsCount = 1;
 
 
+    public float sprayMultiplayer = 0f;
     public float fireRater;
+
+
+    [Header("Projectile Weapon Settings")]
+    public bool isProjectileWeapon = false;
+    public GameObject projectile;
+    public Transform projectileExit;
 
 
     [Header("VFX")]
@@ -134,7 +142,12 @@ public class Weapon : MonoBehaviour
             ammoText.text = ammo + "/" + magAmmo;
             SetAmmo();
 
-            Fire();
+
+            if (isProjectileWeapon)
+            {
+                ProjectileFire();
+            }
+            else { Fire(); }
         }
 
 
@@ -210,6 +223,7 @@ public class Weapon : MonoBehaviour
     }
 
 
+
     private void RandomNum()
     {
         int randomRange = Random.Range(1, 3);
@@ -220,6 +234,17 @@ public class Weapon : MonoBehaviour
         }
         else { isOne = false; }
     }
+
+
+
+    private void ProjectileFire()
+    {
+        GameObject myProjectile = PhotonNetwork.Instantiate(projectile.name, projectileExit.position, projectileExit.rotation);
+        myProjectile.GetComponent<Explosive>().isLocalExplosive = true;
+
+        playerPhotonSoundManager.PlayShootSFX(shootSFXIndex);
+    }
+
 
 
     private void Reload()
@@ -261,33 +286,40 @@ public class Weapon : MonoBehaviour
         playerPhotonSoundManager.PlayShootSFX(shootSFXIndex);
 
 
-        Ray ray = new Ray(camera.transform.position, camera.transform.forward);
-
-        RaycastHit hit;
-
-        PhotonNetwork.LocalPlayer.AddScore(1);
-
-
-        if (Physics.Raycast(ray.origin, ray.direction, out hit, 100f))
+        for (int i = 0; i < pelletsCount; i++)
         {
-            PhotonNetwork.Instantiate(hitVFX.name, hit.point, Quaternion.identity);
+            Vector3 sprayOffset = Random.insideUnitCircle * sprayMultiplayer;
+            sprayOffset.z = 0;
 
-            if (hit.transform.gameObject.GetComponent<Health>())
+
+            Ray ray = new Ray(camera.transform.position, camera.transform.forward + sprayOffset);
+
+            RaycastHit hit;
+
+            PhotonNetwork.LocalPlayer.AddScore(1);
+
+
+            if (Physics.Raycast(ray.origin, ray.direction, out hit, 100f))
             {
-                PhotonNetwork.LocalPlayer.AddScore(damage);
+                PhotonNetwork.Instantiate(hitVFX.name, hit.point, Quaternion.identity);
 
-                if (damage >= hit.transform.gameObject.GetComponent<Health>().health)
+                if (hit.transform.gameObject.GetComponent<Health>() && hit.transform.gameObject.GetComponent<Health>().isLocalPlayer == false)
                 {
-                    //Kill
+                    PhotonNetwork.LocalPlayer.AddScore(damage);
 
-                    RoomManager.instance.kills++;
-                    RoomManager.instance.SetHashes();
+                    if (damage >= hit.transform.gameObject.GetComponent<Health>().health)
+                    {
+                        //Kill
 
-                    PhotonNetwork.LocalPlayer.AddScore(100);
+                        RoomManager.instance.kills++;
+                        RoomManager.instance.SetHashes();
+
+                        PhotonNetwork.LocalPlayer.AddScore(100);
+                    }
+
+
+                    hit.transform.gameObject.GetComponent<PhotonView>().RPC("TakeDamage", RpcTarget.All, damage);
                 }
-
-
-                hit.transform.gameObject.GetComponent<PhotonView>().RPC("TakeDamage", RpcTarget.All, damage);
             }
         }
     }
@@ -339,7 +371,15 @@ public class Weapon : MonoBehaviour
             {
                 yield return new WaitForSeconds(3.5f);
             }
-            else { yield return new WaitForSeconds(2.8f); }
+            else if (gameObject.name == ("FPS_Anims"))
+            {
+                yield return new WaitForSeconds(2.8f);
+            }
+            else if (gameObject.name == ("shotgunAnimated"))
+            {
+                yield return new WaitForSeconds(1.8f);
+            }
+            else { yield return new WaitForSeconds(4.1f); }
         }
         else
         {
@@ -347,7 +387,10 @@ public class Weapon : MonoBehaviour
             {
                 yield return new WaitForSeconds(2.7f);
             }
-            else { yield return new WaitForSeconds(2f); }
+            else if (gameObject.name == ("FPS_Anims"))
+            {
+                yield return new WaitForSeconds(2f);
+            }
         }
 
         isReloading = false;

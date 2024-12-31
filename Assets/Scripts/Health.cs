@@ -22,6 +22,10 @@ public class Health : MonoBehaviour
     public TextMeshProUGUI healthText;
 
 
+    private bool hasDied;
+
+
+
     private void Start()
     {
         originalHealthBarSize = healthBar.sizeDelta.x;
@@ -31,6 +35,9 @@ public class Health : MonoBehaviour
     [PunRPC]
     public void TakeDamage(int _damage)
     {
+        if (hasDied)
+            return;
+
         health -= _damage;
 
         healthBar.sizeDelta = new Vector2(originalHealthBarSize * health / 100f, healthBar.sizeDelta.y);
@@ -39,6 +46,8 @@ public class Health : MonoBehaviour
 
         if (health <= 0)
         {
+            hasDied = true;
+
             if (isLocalPlayer)
             {
                 RoomManager.instance.SpawnPlayer();

@@ -1,11 +1,13 @@
 using UnityEngine;
 using Photon.Pun;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
-
+using Photon.Realtime;
+using UnityEngine.SceneManagement;
 
 public class RoomManager : MonoBehaviourPunCallbacks
 {
     public static RoomManager instance;
+
 
     public GameObject player;
 
@@ -27,7 +29,8 @@ public class RoomManager : MonoBehaviourPunCallbacks
     public int deaths = 0;
 
 
-    public string roomNameToJoin = "test";
+    public string roomNameToJoin = "Test";
+    public string mapName = "Nothing";
 
 
 
@@ -54,7 +57,21 @@ public class RoomManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("Connecting...");
 
-        PhotonNetwork.JoinOrCreateRoom(roomNameToJoin, null, null);
+        RoomOptions ro = new RoomOptions();
+
+        ro.CustomRoomProperties = new Hashtable()
+        {
+            { "mapSceneIndex", SceneManager.GetActiveScene().buildIndex },
+            { "mapName", mapName }
+        };
+
+        ro.CustomRoomPropertiesForLobby = new[]
+        {
+            "mapSceneIndex",
+            "mapName"
+        };
+
+        PhotonNetwork.JoinOrCreateRoom(PlayerPrefs.GetString("RoomNameToJoin"), ro, null);
 
 
         nameUI.SetActive(false);

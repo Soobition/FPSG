@@ -38,7 +38,7 @@ public class PlayerSetup : MonoBehaviour
     public void SetTPWeapon(int _weaponIndex)
     {
         foreach (Transform _weapon in tpWeaponHolder)
-        { 
+        {
             _weapon.gameObject.SetActive(false);
         }
 
@@ -47,12 +47,26 @@ public class PlayerSetup : MonoBehaviour
 
 
 
-    [PunRPC]
+    /*[PunRPC]
     public void SetNickname(string _name)
     {
         nickname = _name;
 
         nicknameText.text = nickname;
+    }*/
+
+
+    [PunRPC]
+    public void SetNickname(string _name, PhotonMessageInfo info)
+    {
+        nickname = _name;
+        // Check if the player is the local player
+        if (info.Sender != PhotonNetwork.LocalPlayer)
+        {
+            nicknameText.text = nickname;
+        }
+        else { nicknameText.text = ""; } // Or you can set it to null or any other placeholder
+
     }
 
 }
