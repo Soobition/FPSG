@@ -18,6 +18,9 @@ public class Movement : MonoBehaviour
     public AnimationClip handIdleAnimation;
 
 
+    public static bool isbackwards;
+
+
 
     private Vector2 input;
 
@@ -60,7 +63,19 @@ public class Movement : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        grounded = true;
+        if (other.CompareTag("Ground"))
+        {
+            grounded = true;
+        }
+    }
+
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Ground"))
+        {
+            grounded = false;
+        }
     }
 
 
@@ -80,11 +95,31 @@ public class Movement : MonoBehaviour
                 handAnimation.clip = handWalkAnimation;
                 handAnimation.Play();
 
-                if (!Input.GetButton("Fire1"))
+                if (Input.GetButton("Fire1") && !Weapon.isEmpty)
                 {
-                    rb.AddForce(CalculateMovement(sprinting ? sprintSpeed : walkSpeed), ForceMode.VelocityChange);
+                    rb.AddForce(CalculateMovement(sprinting ? sprintSpeed - 3.5f : walkSpeed), ForceMode.VelocityChange);
                 }
-                else { rb.AddForce(CalculateMovement(sprinting ? sprintSpeed - 3.5f : walkSpeed), ForceMode.VelocityChange); }
+                else
+                { 
+                    if (input.y < 0)
+                    {
+                        if (sprinting || !sprinting)
+                        {
+                            rb.AddForce(CalculateMovement(walkSpeed), ForceMode.VelocityChange);
+                        }
+
+                        isbackwards = true;
+                    }
+                    else
+                    {
+                        if (input.y > 0)
+                        {
+                            isbackwards = false;
+                        }
+
+                        rb.AddForce(CalculateMovement(sprinting ? sprintSpeed : walkSpeed), ForceMode.VelocityChange);
+                    }
+                }
             }
             else
             {
@@ -112,7 +147,7 @@ public class Movement : MonoBehaviour
             }
         }
 
-        grounded = false;
+        //grounded = false;
     }
 
 

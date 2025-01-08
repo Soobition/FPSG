@@ -64,7 +64,7 @@ public class Weapon : MonoBehaviour
 
 
 
-    public static bool isWalking, isGrounded, isHolsterUp, isHolsterDown, isRunning;
+    public static bool isWalking, isGrounded, isHolsterUp, isHolsterDown, isRunning, isEmpty;
 
 
 
@@ -123,6 +123,42 @@ public class Weapon : MonoBehaviour
 
     void Update()
     {
+        magText.text = mag.ToString();
+        ammoText.text = ammo + "/" + magAmmo;
+        SetAmmo();
+
+
+        if (gameObject.name == "FpsAnims")
+        {
+            PlayerSetup.isAK = true;
+            PlayerSetup.isPistol = false;
+            PlayerSetup.isShotgun = false;
+            PlayerSetup.isLauncher = false;
+        }
+        else if (gameObject.name == "FPS_Anims")
+        {
+            PlayerSetup.isAK = false;
+            PlayerSetup.isPistol = true;
+            PlayerSetup.isShotgun = false;
+            PlayerSetup.isLauncher = false;
+        }
+        else if (gameObject.name == "shotgunAnimated")
+        {
+            PlayerSetup.isAK = false;
+            PlayerSetup.isPistol = false;
+            PlayerSetup.isShotgun = true;
+            PlayerSetup.isLauncher = false;
+        }
+        else
+        {
+            PlayerSetup.isAK = false;
+            PlayerSetup.isPistol = false;
+            PlayerSetup.isShotgun = false;
+            PlayerSetup.isLauncher = true;
+        }
+
+
+
         UpdateAnimationState();
 
 
@@ -138,9 +174,9 @@ public class Weapon : MonoBehaviour
 
             ammo--;
 
-            magText.text = mag.ToString();
+            /*magText.text = mag.ToString();
             ammoText.text = ammo + "/" + magAmmo;
-            SetAmmo();
+            SetAmmo();*/
 
 
             if (isProjectileWeapon)
@@ -151,15 +187,30 @@ public class Weapon : MonoBehaviour
         }
 
 
-        if (Input.GetKeyDown(KeyCode.R) && ammo != 30)
+        if (Input.GetKeyDown(KeyCode.R))
         {
-            Reload();
+            if (gameObject.name == ("FpsAnims") && ammo != 30)
+            {
+                Reload();
+            }
+            else if (gameObject.name == ("FPS_Anims") && ammo != 15)
+            {
+                Reload();
+            }
+            else if (gameObject.name == ("shotgunAnimated") && ammo != 1 || gameObject.name == ("Launcher") && ammo != 1)
+            {
+                Reload();
+            }
         }
 
 
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
-            isRunning = true;
+            if (!Movement.isbackwards)
+            {
+                isRunning = true;
+            }
+            else { isRunning = false; }
         }
         else if (Input.GetKeyUp(KeyCode.LeftShift))
         {
@@ -177,6 +228,12 @@ public class Weapon : MonoBehaviour
         {
             Recovering();
         }
+
+        if (ammo > 0)
+        {
+            isEmpty = false;
+        }
+        else { isEmpty = true; }
     }
 
 
@@ -189,6 +246,15 @@ public class Weapon : MonoBehaviour
         else if (isHolsterDown)
         {
             HolsterDown();
+
+
+            if (isReloading)
+            {
+                isReloading = false;
+
+                StartCoroutine(Reloading());
+            }
+
         }
     }
 
@@ -269,9 +335,9 @@ public class Weapon : MonoBehaviour
             ammo = magAmmo;
         }
 
-        magText.text = mag.ToString();
+        /*magText.text = mag.ToString();
         ammoText.text = ammo + "/" + magAmmo;
-        SetAmmo();
+        SetAmmo();*/
     }
 
 

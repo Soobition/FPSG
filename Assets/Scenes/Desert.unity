@@ -2758,6 +2758,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   chatText: {fileID: 1018495373}
   inputField: {fileID: 83980377}
+  movement: {fileID: 3730521609816828880, guid: f13f6295980ef394fb96e8b3dbb9406d, type: 3}
 --- !u!114 &849867327
 MonoBehaviour:
   m_ObjectHideFlags: 0

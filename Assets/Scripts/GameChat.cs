@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using WebSocketSharp;
 using Photon.Pun;
+using Photon.Realtime;
 
 public class GameChat : MonoBehaviour
 {
@@ -16,7 +17,7 @@ public class GameChat : MonoBehaviour
 
 
 
-    void Update()
+    private void Update()
     {
         
         if (Input.GetKeyDown(KeyCode.Y) && !isInputFieldToggled)
@@ -24,6 +25,8 @@ public class GameChat : MonoBehaviour
             isInputFieldToggled = true;
             inputField.Select();
             inputField.ActivateInputField();
+
+            TogglePlayerComponents(false);
 
             Debug.Log("Toggled on");
         }
@@ -34,6 +37,8 @@ public class GameChat : MonoBehaviour
             isInputFieldToggled = false;
 
             UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
+
+            TogglePlayerComponents(true);
 
             Debug.Log("Toggled off");
         }
@@ -56,11 +61,41 @@ public class GameChat : MonoBehaviour
             UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
 
             Debug.Log("Message sent");
+
+
+            // Toggled on
+            isInputFieldToggled = true;
+            inputField.Select();
+            inputField.ActivateInputField();
+
+            Debug.Log("Toggled on");
         }
     }
 
 
-    [PunRPC]
+    private void TogglePlayerComponents(bool state)
+    {
+        GameObject player = GameObject.Find("Player(Clone)");
+
+        if (player != null)
+        {
+            player.GetComponent<Movement>().enabled = state;
+
+            Weapon[] weapons = player.GetComponentsInChildren<Weapon>();
+            foreach (Weapon Item in weapons)
+            {
+                Item.enabled = state;
+            }
+        }
+        else
+        {
+            Debug.LogWarning("Player object not found");
+        }
+
+    }
+
+
+        [PunRPC]
     public void SendChatMessage(string _message)
     {
         chatText.text = chatText.text + "\n" + _message;

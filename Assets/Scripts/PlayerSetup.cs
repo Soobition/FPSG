@@ -20,6 +20,51 @@ public class PlayerSetup : MonoBehaviour
     public Transform tpWeaponHolder;
 
 
+    [Header("Aim")]
+    public GameObject akAim;
+    public GameObject pistolAim;
+    public GameObject shotgunAim;
+    public GameObject launcherAim;
+
+
+
+    public static bool isAK, isPistol, isShotgun, isLauncher;
+
+
+
+    private void Update()
+    {
+        if (isAK)
+        {
+            akAim.SetActive(true);
+            pistolAim.SetActive(false);
+            shotgunAim.SetActive(false);
+            launcherAim.SetActive(false);
+        }
+        else if (isPistol)
+        {
+            akAim.SetActive(false);
+            pistolAim.SetActive(true);
+            shotgunAim.SetActive(false);
+            launcherAim.SetActive(false);
+        }
+        else if (isShotgun)
+        {
+            akAim.SetActive(false);
+            pistolAim.SetActive(false);
+            shotgunAim.SetActive(true);
+            launcherAim.SetActive(false);
+        }
+        else
+        {
+            akAim.SetActive(false);
+            pistolAim.SetActive(false);
+            shotgunAim.SetActive(false);
+            launcherAim.SetActive(true);
+        }
+    }
+
+
 
 
     public void IsLocalPlayer()
