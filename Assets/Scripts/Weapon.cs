@@ -31,6 +31,11 @@ public class Weapon : MonoBehaviour
     [Header("VFX")]
     public GameObject hitVFX;
 
+    [Space]
+    public GameObject muzzleFlashVFX;
+    public Transform muzzleFlashPoint;
+    public float muzzleFlashDuration = 0.1f;
+
 
     [Header("Ammo")]
     public int mag = 5;
@@ -40,6 +45,7 @@ public class Weapon : MonoBehaviour
 
     [Header("SFX")]
     public int shootSFXIndex = 0;
+    public int emptyMagSFXIndex = 0;
     public PlayerPhotonSoundManager playerPhotonSoundManager;
 
 
@@ -64,7 +70,7 @@ public class Weapon : MonoBehaviour
 
 
 
-    public static bool isWalking, isGrounded, isHolsterUp, isHolsterDown, isRunning, isEmpty;
+    public static bool isWalking, isGround, isHolsterUp, isHolsterDown, isRunning, isEmpty;
 
 
 
@@ -168,6 +174,8 @@ public class Weapon : MonoBehaviour
 
         if (Input.GetButton("Fire1") && nextFire <= 0 && ammo > 0 && isReloading == false)
         {
+            StartCoroutine(MuzzleFlashVFX());
+
             isRunning = false;
 
             nextFire = 1 / fireRater;
@@ -184,6 +192,10 @@ public class Weapon : MonoBehaviour
                 ProjectileFire();
             }
             else { Fire(); }
+        }
+        else if (Input.GetButton("Fire1") && ammo == 0)
+        {
+            playerPhotonSoundManager.PlayEmptyMagSFX(emptyMagSFXIndex);
         }
 
 
@@ -234,6 +246,26 @@ public class Weapon : MonoBehaviour
             isEmpty = false;
         }
         else { isEmpty = true; }
+    }
+
+
+    private IEnumerator MuzzleFlashVFX()
+    {
+        {
+            GameObject muzzleFlash = Instantiate(muzzleFlashVFX, muzzleFlashPoint.position, muzzleFlashPoint.rotation);
+            muzzleFlash.transform.parent = muzzleFlashPoint; // Parent the flash to the muzzle point for better control
+
+            if (gameObject.name == ("Launcher"))
+            {
+                yield return new WaitForSeconds(muzzleFlashDuration * 3);
+            }
+            else
+            {
+                yield return new WaitForSeconds(muzzleFlashDuration);
+            }
+
+            Destroy(muzzleFlash);
+        }
     }
 
 
@@ -482,7 +514,7 @@ public class Weapon : MonoBehaviour
             }
             else { state = movementState.reload_1; }
         }
-        else if (isRunning && isGrounded && isWalking)
+        else if (isRunning && isGround && isWalking)
         {
             state = movementState.run;
         }

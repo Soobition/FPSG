@@ -47,6 +47,8 @@ MonoBehaviour:
   - PlayShotSFX_RPC
   - PlayRunningFootstepSFX_RPC
   - SendChatMessage
+  - PlayEmptyMagSFX_RPC
+  - ShortCircuit
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

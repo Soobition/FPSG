@@ -7,16 +7,40 @@ public class PlayerPhotonSoundManager : MonoBehaviour
     public AudioSource footstepSourse;
     public AudioClip footstepSFX;
 
+    [Space]
+    public AudioSource emptyMagSourse;
+    public AudioClip[] emptyMagSFX;
+
+    [Space]
     public AudioSource gunShootSourse;
     public AudioClip[] allGunShootSFX;
 
 
 
-    public void PlayFootstepSFX()
+
+    public void PlayEmptyMagSFX(int index)
     {
-        GetComponent<PhotonView>().RPC("PlayFootstepSFX_RPC", RpcTarget.All);
+        GetComponent<PhotonView>().RPC("PlayEmptyMagSFX_RPC", RpcTarget.All, index);
     }
 
+    [PunRPC]
+    public void PlayEmptyMagSFX_RPC(int index)
+    {
+        emptyMagSourse.clip = emptyMagSFX[index];
+
+        emptyMagSourse.Play();
+    }
+
+
+
+
+    public void PlayFootstepSFX()
+    {
+        if (Weapon.isGround)
+        {
+            GetComponent<PhotonView>().RPC("PlayFootstepSFX_RPC", RpcTarget.All);
+        }
+    }
 
     [PunRPC]
     public void PlayFootstepSFX_RPC()
@@ -31,14 +55,15 @@ public class PlayerPhotonSoundManager : MonoBehaviour
     }
 
 
+
+
     public void PlayRunningFootstepSFX()
     {
-        if (Weapon.isRunning)
+        if (Weapon.isRunning && Weapon.isGround)
         {
             GetComponent<PhotonView>().RPC("PlayRunningFootstepSFX_RPC", RpcTarget.All);
         }
     }
-
 
     [PunRPC]
     public void PlayRunningFootstepSFX_RPC()
@@ -54,11 +79,11 @@ public class PlayerPhotonSoundManager : MonoBehaviour
 
 
 
+
     public void PlayShootSFX(int index)
     {
         GetComponent<PhotonView>().RPC("PlayShotSFX_RPC", RpcTarget.All, index);
     }
-
 
     [PunRPC]
     public void PlayShotSFX_RPC(int index)

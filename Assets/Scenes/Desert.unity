@@ -2758,7 +2758,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   chatText: {fileID: 1018495373}
   inputField: {fileID: 83980377}
-  movement: {fileID: 3730521609816828880, guid: f13f6295980ef394fb96e8b3dbb9406d, type: 3}
 --- !u!114 &849867327
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3501,15 +3500,15 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1012351798}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.04701361, y: 0.95250237, z: -0.22736043, w: -0.19706929}
-  m_LocalPosition: {x: 5.859536, y: 4.361886, z: 14.414021}
+  m_LocalRotation: {x: 0.1126843, y: -0.4207468, z: 0.05290177, w: 0.8985966}
+  m_LocalPosition: {x: -2.077607, y: 11.564415, z: 32.41565}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 667380889}
   - {fileID: 1529840172}
   m_Father: {fileID: 875968351}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 26.85, y: -169.6, z: 0.003}
 --- !u!114 &1012351800
 MonoBehaviour:
   m_ObjectHideFlags: 0

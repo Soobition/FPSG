@@ -21,6 +21,8 @@ public class Explosive : MonoBehaviour
     public GameObject explosionVFX;
 
 
+    public static bool isExploded;
+
 
     private bool alreadyExploded = false;
 
@@ -38,6 +40,8 @@ public class Explosive : MonoBehaviour
             return;
 
         PhotonNetwork.Instantiate(explosionVFX.name, transform.position, Quaternion.identity);
+
+        isExploded = true;
 
         // Explode Function
 

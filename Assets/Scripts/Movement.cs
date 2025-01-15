@@ -55,15 +55,15 @@ public class Movement : MonoBehaviour
 
         if (grounded)
         {
-            Weapon.isGrounded = true;
+            Weapon.isGround = true;
         }
-        else { Weapon.isGrounded = false; }
+        else { Weapon.isGround = false; }
     }
 
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.CompareTag("Ground"))
+        if (other.CompareTag("Ground") || other.CompareTag("Obstacle"))
         {
             grounded = true;
         }
@@ -72,7 +72,7 @@ public class Movement : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("Ground"))
+        if (other.CompareTag("Ground") || other.CompareTag("Obstacle"))
         {
             grounded = false;
         }
